@@ -24,8 +24,32 @@ public final class Constants
   public static final double ROBOT_MASS = (148 - 20.3) * 0.453592; // 32lbs * kg per pound
   public static final Matter CHASSIS    = new Matter(new Translation3d(0, 0, Units.inchesToMeters(8)), ROBOT_MASS);
   public static final double LOOP_TIME  = 0.13; //s, 20ms + 110ms sprk max velocity lag
-  public static final double MAX_SPEED  = Units.feetToMeters(14.5);
+  public static final double MAX_SPEED  = Units.feetToMeters(14.5*.1); //TODO: increase scalar of 0.25 as drivers become more comfortable
       // Maximum speed of the robot in meters per second, used to limit acceleration.
+  //CANid constants
+  public static final int INTAKE_MOTOR_CAN_ID = 2;
+
+  //Intake Motor Values
+  public static final int INTAKE_MOTOR_SMART_CURRENT_LIMIT = 20;
+  public static final double INTAKE_MOTOR_SECONDARY_CURRENT_LIMIT = 40;
+  public static final double INTAKE_MOTOR_PCT = 55.0;
+  public static final double OUTTAKE_MOTOR_PCT = -20.0;
+
+   //Intake Sensor
+   public static final int INTAKE_SENSOR_DIO_PORT = 0;
+   public static final int INDEX_MOTOR_CAN_ID = 1;
+public static final int INDEX_MOTOR_SMART_CURRENT_LIMIT = 20;
+public static final double INDEX_MOTOR_SECONDARY_CURRENT_LIMIT = 40;
+public static final double UPINDEX_MOTOR_PCT = 95.0;
+public static final double DOWNINDEX_MOTOR_PCT = -45.0;
+
+public static final double FR_SHOOTER_MOTOR_REVERSE_PCT = -10.0;
+public static final double FL_SHOOTER_MOTOR_REVERSE_PCT = 10.0;
+public static final int FL_SHOOTER_MOTOR_SMART_CURRENT_LIMIT = 30;
+public static final int FR_SHOOTER_MOTOR_SMART_CURRENT_LIMIT = 30;
+public static final int FL_SHOOTER_MOTOR_CAN_ID = 3;
+public static final int FR_SHOOTER_MOTOR_CAN_ID = 4;
+
 
   public static final class AutonConstants
   {

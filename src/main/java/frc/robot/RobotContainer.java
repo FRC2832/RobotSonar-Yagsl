@@ -9,29 +9,52 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.IntakeNoteCmd;
+import frc.robot.commands.OuttakeNoteCmd;
+import frc.robot.commands.PrimeShooterSpeakerCmd;
+import frc.robot.commands.ReverseShooterCmd;
+import frc.robot.commands.RunIndexDownCmd;
+import frc.robot.commands.RunIndexUpCmd;
+import frc.robot.commands.RunIndexContinuousCmd;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
+import frc.robot.subsystems.IndexerSubSys;
+import frc.robot.subsystems.IntakeSubSys;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import frc.robot.subsystems.ShooterSubSys;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
  * little robot logic should actually be handled in the {@link Robot} periodic methods (other than the scheduler calls).
  * Instead, the structure of the robot (including subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer
-{
+public class RobotContainer{
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final CommandXboxController driverXbox = new CommandXboxController(0);
+  final CommandXboxController operatorXbox = new CommandXboxController(1);
+  private IntakeSubSys intakeSubSysObj;
+  private IndexerSubSys indexerSubSysObj;
+  private ShooterSubSys shooterSubSysObj;
+  //private REVColorSensor colorSensorObj;
+  private DigitalInput intakeSensor;
+
+  
+
+
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem drivebase = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                          "swerve/neo"));
@@ -85,6 +108,15 @@ public class RobotContainer
    */
   public RobotContainer()
   {
+    intakeSubSysObj = new IntakeSubSys();
+    indexerSubSysObj = new IndexerSubSys();
+    shooterSubSysObj = new ShooterSubSys();
+    //climberSubSysObj = new ClimberSubSys();
+    //shooterAnglerSubSysObj = new ShooterAnglerSubSys();
+    //ampScorerSubSysObj = new AmpScorerSubSys();
+    //colorSensorObj = new REVColorSensor(Port.kMXP); 
+    intakeSensor = new DigitalInput(Constants.INTAKE_SENSOR_DIO_PORT);
+
     // Configure the trigger bindings
     configureBindings();
   }
@@ -96,8 +128,7 @@ public class RobotContainer
    * {@link CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
    * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
-  private void configureBindings()
-  {
+  private void configureBindings() {
     if (DriverStation.isTest())
     {
       driverXbox.b().whileTrue(drivebase.sysIdDriveMotorCommand());
@@ -123,9 +154,56 @@ public class RobotContainer
       driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driverXbox.rightBumper().onTrue(Commands.none());
       drivebase.setDefaultCommand(
-          !RobotBase.isSimulation() ? driveFieldOrientedDirectAngle : driveFieldOrientedDirectAngleSim);
-    }
+          !RobotBase.isSimulation() ? driveFieldOrientedAnglularVelocity : driveFieldOrientedDirectAngleSim);
+    }                                                 //was DirectAngle ilo AngularVelocity
+  
+     Trigger operatorLeftTrigger = operatorXbox.leftTrigger();
+     Trigger operatorRightTrigger = operatorXbox.rightTrigger();
+     Trigger operatorLeftBumper = operatorXbox.leftBumper();
+     Trigger operatorRightBumper = operatorXbox.rightBumper();
+      
+     Trigger operatorAButton = operatorXbox.a();
+     Trigger operatorYButton = operatorXbox.y();
+
+     Trigger driverRightTrigger = driverXbox.rightTrigger();
+     Trigger driverXButton = driverXbox.x();
+
+
+        //SequentialCommandGroup intakeGroup = new SequentialCommandGroup(
+              //  new ParallelCommandGroup(
+                  //      new AngleShooterUpCmd(shooterAnglerSubSysObj),
+                 //       new IntakeNoteCmd(intakeSubSysObj, intakeSensor, colorSensorObj, driverController, operatorController),
+                 //       new RunIndexUpCmd(indexerSubSysObj, colorSensorObj), 
+                 //       new LightningFlash(leds, Color.kDarkSalmon)
+           //     )
+       // );
+       // intakeGroup.setName("intakeGroup");
+
+       ParallelCommandGroup outtakeGroup = new ParallelCommandGroup(
+                new OuttakeNoteCmd(intakeSubSysObj),
+                new RunIndexDownCmd(indexerSubSysObj)
+        );
+        outtakeGroup.setName("outtakeGroup");
+
+        // Operator Trigger Commands        
+        operatorLeftTrigger.whileTrue(outtakeGroup);
+        operatorRightTrigger.whileTrue(new IntakeNoteCmd(intakeSubSysObj, intakeSensor, driverXbox, operatorXbox));
+                                                                                      // , colorSensorObj was in here above
+
+        // Operator Bumper Commands
+        operatorLeftBumper.whileTrue(new RunIndexDownCmd(indexerSubSysObj));
+        operatorRightBumper.whileTrue(new RunIndexUpCmd(indexerSubSysObj));
+                                                                      // was in above: colorSensorObj
+
+          // Operator Button Commands
+        operatorAButton.whileTrue(new PrimeShooterSpeakerCmd(shooterSubSysObj));  // speakershootingGroup 
+        operatorYButton.whileTrue(new ReverseShooterCmd(shooterSubSysObj));
+
+        // Driver Input Commands (All of the driver input commands)
+        driverRightTrigger.whileTrue(new RunIndexContinuousCmd(indexerSubSysObj));
+        driverXButton.whileTrue(new RunIndexDownCmd(indexerSubSysObj));
   }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

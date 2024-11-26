@@ -110,6 +110,9 @@ public class SwerveSubsystem extends SubsystemBase
     swerveDrive.setModuleEncoderAutoSynchronize(false,
                                                 1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
     swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
+    swerveDrive.swerveController.setMaximumAngularVelocity(2); //TODO: slowely increase as drivers become used to the turning. 
+                              //slows robot turning rate. set higher to turn fast
+
     if (visionDriveTest)
     {
       setupPhotonVision();
@@ -312,7 +315,7 @@ public class SwerveSubsystem extends SubsystemBase
                                                                       headingX.getAsDouble(),
                                                                       headingY.getAsDouble(),
                                                                       swerveDrive.getOdometryHeading().getRadians(),
-                                                                      1));
+                                                                      1)); //TODO: Increase to make robot faster
     });
   }
 
@@ -429,8 +432,8 @@ public class SwerveSubsystem extends SubsystemBase
     return run(() -> {
       // Make the robot move
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-                            translationX.getAsDouble() * swerveDrive.getMaximumVelocity(),
-                            translationY.getAsDouble() * swerveDrive.getMaximumVelocity()), 0.8),
+                            translationX.getAsDouble() * swerveDrive.getMaximumVelocity()*0.5,  //TODO: remove this as driers get more comfortable. added 0.5 to limit speed
+                            translationY.getAsDouble() * swerveDrive.getMaximumVelocity() * 0.5), 0.8),  //TODO: remove this as driers get more comfortable. a
                         Math.pow(angularRotationX.getAsDouble(), 3) * swerveDrive.getMaximumAngularVelocity(),
                         true,
                         false);

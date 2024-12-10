@@ -92,7 +92,12 @@ public class SwerveSubsystem extends SubsystemBase
     System.out.println("}");
 
     // Configure the Telemetry before creating the SwerveDrive to avoid unnecessary objects being created.
-    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
+    SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;  //TODO: may need/want to set to POSE as YAGSL docs say 
+                                              //setting at HIGH can cause severe lag
+    //swerveDrive.setChassisDiscretization(true, 0.02); //TODO: supposed to help reduce motion skew of robot.
+                                                // 0.02 is the default value by YAGSL. Need to test with and without this
+                                                //see what happens
+                                                
     try
     {
       swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.MAX_SPEED);

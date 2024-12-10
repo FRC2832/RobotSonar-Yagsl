@@ -32,6 +32,7 @@ import frc.robot.commands.RunIndexContinuousCmd;
 import frc.robot.commands.swervedrive.drivebase.AbsoluteDriveAdv;
 import frc.robot.subsystems.IndexerSubSys;
 import frc.robot.subsystems.IntakeSubSys;
+import frc.robot.subsystems.swervedrive.LimeLightSubSys;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import frc.robot.subsystems.ShooterSubSys;
@@ -49,6 +50,7 @@ public class RobotContainer{
   private IntakeSubSys intakeSubSysObj;
   private IndexerSubSys indexerSubSysObj;
   private ShooterSubSys shooterSubSysObj;
+  private LimeLightSubSys limeLightSubSysObj;
   //private REVColorSensor colorSensorObj;
   private DigitalInput intakeSensor;
 
@@ -111,6 +113,7 @@ public class RobotContainer{
     intakeSubSysObj = new IntakeSubSys();
     indexerSubSysObj = new IndexerSubSys();
     shooterSubSysObj = new ShooterSubSys();
+    limeLightSubSysObj = new LimeLightSubSys();
     //climberSubSysObj = new ClimberSubSys();
     //shooterAnglerSubSysObj = new ShooterAnglerSubSys();
     //ampScorerSubSysObj = new AmpScorerSubSys();
